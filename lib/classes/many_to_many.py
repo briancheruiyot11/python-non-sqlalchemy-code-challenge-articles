@@ -1,8 +1,8 @@
 class Article:
-    all = []  # track all article instances
+    all = []  # keeps track of every article created
 
     def __init__(self, author, magazine, title):
-        # --- validations ---
+        # make sure the title is a string and between 5–50 characters
         if not isinstance(title, str) or not (5 <= len(title) <= 50):
             raise Exception("title must be a string between 5 and 50 characters")
 
@@ -12,17 +12,17 @@ class Article:
 
         Article.all.append(self)
 
-    # --- Title property (immutable) ---
+    # title is read-only once set
     @property
     def title(self):
         return self._title
 
     @title.setter
     def title(self, value):
-        # ignore reassignment to keep title immutable
+        # do nothing if someone tries to reset the title
         pass
 
-    # --- Author property ---
+    # author must always be an Author object
     @property
     def author(self):
         return self._author
@@ -33,7 +33,7 @@ class Article:
             raise Exception("author must be an Author instance")
         self._author = value
 
-    # --- Magazine property ---
+    # magazine must always be a Magazine object
     @property
     def magazine(self):
         return self._magazine
@@ -51,41 +51,43 @@ class Author:
             raise Exception("name must be a non-empty string")
         self._name = name
 
-    # --- Name property (immutable) ---
+    # name can’t be changed once set
     @property
     def name(self):
         return self._name
 
     @name.setter
     def name(self, value):
-        # ignore reassignment to keep name immutable
+        # ignore attempts to rename the author
         pass
 
-    # --- Relationship methods ---
+    # get all articles written by this author
     def articles(self):
         return [article for article in Article.all if article.author == self]
 
+    # get all magazines this author has written for
     def magazines(self):
         return list({article.magazine for article in self.articles()})
 
-    # --- Association methods ---
+    # create and add a new article
     def add_article(self, magazine, title):
         return Article(self, magazine, title)
 
+    # get all unique categories the author has written in
     def topic_areas(self):
         cats = {mag.category for mag in self.magazines()}
         return list(cats) if cats else None
 
 
 class Magazine:
-    all = []  # track all magazine instances
+    all = []  # keeps track of every magazine created
 
     def __init__(self, name, category):
         self.name = name      
         self.category = category
         Magazine.all.append(self)
 
-    # --- Name property (mutable) ---
+    # name can be changed but must be 2–16 characters
     @property
     def name(self):
         return self._name
@@ -94,9 +96,9 @@ class Magazine:
     def name(self, value):
         if isinstance(value, str) and 2 <= len(value) <= 16:
             self._name = value
-        # else ignore invalid assignments to pass tests
+        # if invalid, ignore the change
 
-    # --- Category property (mutable) ---
+    # category can be changed but must be a non-empty string
     @property
     def category(self):
         return self._category
@@ -105,26 +107,28 @@ class Magazine:
     def category(self, value):
         if isinstance(value, str) and len(value) > 0:
             self._category = value
-        # else ignore invalid assignments
+        # ignore invalid values
 
-    # --- Relationship methods ---
+    # get all articles published in this magazine
     def articles(self):
         return [article for article in Article.all if article.magazine == self]
 
+    # get all authors who wrote for this magazine
     def contributors(self):
         return list({article.author for article in self.articles()})
 
-    # --- Association methods ---
+    # get just the titles of the articles in this magazine
     def article_titles(self):
         titles = [article.title for article in self.articles()]
         return titles if titles else None
 
+    # get authors who have written more than 2 articles here
     def contributing_authors(self):
         authors = [article.author for article in self.articles()]
         result = [a for a in set(authors) if authors.count(a) > 2]
         return result if result else None
 
-    # --- Bonus ---
+    # find the magazine with the most articles overall
     @classmethod
     def top_publisher(cls):
         if not Article.all:
