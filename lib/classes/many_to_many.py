@@ -51,7 +51,6 @@ class Author:
             raise Exception("name must be a non-empty string")
         self._name = name
 
-    # name can’t be changed once set
     @property
     def name(self):
         return self._name
